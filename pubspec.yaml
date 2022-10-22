@@ -37,6 +37,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.0.2
+  fpdart: ^0.3.0
   google_sign_in: ^5.4.2
 
 dev_dependencies:
