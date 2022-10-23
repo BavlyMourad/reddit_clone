@@ -24,13 +24,13 @@ class Logger extends ProviderObserver {
     Object? newValue,
     ProviderContainer container,
   ) {
-    debugPrint('''
-  {
-    UPDATED
-    "provider": "${provider.name ?? provider.runtimeType}",
-    "newValue": "$newValue"
-  }
-''');
+//     debugPrint('''
+//   {
+//     UPDATED
+//     "provider": "${provider.name ?? provider.runtimeType}",
+//     "newValue": "$newValue"
+//   }
+// ''');
   }
 
   @override
