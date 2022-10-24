@@ -44,6 +44,34 @@ class CommunityRepository {
     }
   }
 
+  FutureVoid joinCommunity(String communityName, String userId) async {
+    try {
+      final result = _communities.doc(communityName).update({
+        'members': FieldValue.arrayUnion([userId]),
+      });
+
+      return right(result);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message.toString()));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  FutureVoid leaveCommunity(String communityName, String userId) async {
+    try {
+      final result = _communities.doc(communityName).update({
+        'members': FieldValue.arrayRemove([userId]),
+      });
+
+      return right(result);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message.toString()));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
   Stream<List<CommunityModel>> getUserCommunities(String uid) {
     // Check if members field in community contains uid
     return _communities
@@ -66,5 +94,41 @@ class CommunityRepository {
     return _communities.doc(name).snapshots().map((event) {
       return CommunityModel.fromMap(event.data() as Map<String, dynamic>);
     });
+  }
+
+  FutureVoid editCommunity(CommunityModel communityModel) async {
+    try {
+      return right(
+        _communities.doc(communityModel.name).update(communityModel.toMap()),
+      );
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message.toString()));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  Future<List<CommunityModel>> searchCommunity(String query) async {
+    return _communities
+        .where(
+          'name',
+          isGreaterThanOrEqualTo: query.isEmpty ? 0 : query,
+          isLessThan: query.isEmpty
+              ? null
+              : query.substring(0, query.length - 1) +
+                  String.fromCharCode(query.codeUnitAt(query.length - 1) + 1),
+        )
+        .snapshots()
+        .map((event) {
+      List<CommunityModel> communities = [];
+
+      for (var community in event.docs) {
+        communities.add(
+          CommunityModel.fromMap(community.data() as Map<String, dynamic>),
+        );
+      }
+
+      return communities;
+    }).first;
   }
 }

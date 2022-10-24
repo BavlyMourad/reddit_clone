@@ -9,8 +9,11 @@ environment:
   sdk: ">=2.18.2 <3.0.0"
 
 dependencies:
+  any_link_preview: ^2.0.9
   cloud_firestore: ^4.0.1
   cupertino_icons: ^1.0.2
+  dotted_border: ^2.0.0+2
+  file_picker: ^5.2.2
   firebase_auth: ^4.0.1
   firebase_core: ^2.0.0
   firebase_storage: ^11.0.1
@@ -20,6 +23,8 @@ dependencies:
   fpdart: ^0.3.0
   google_sign_in: ^5.4.2
   routemaster: ^1.0.1
+  shared_preferences: ^2.0.15
+  uuid: ^3.0.6
 
 dev_dependencies:
   flutter_lints: ^2.0.0

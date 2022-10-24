@@ -78,8 +78,6 @@ class AuthRepository {
         userModel = await getUserData(userCredential.user!.uid).first;
       }
 
-      print(userModel.name);
-
       return right(userModel);
     } on FirebaseException catch (e) {
       return left(Failure(e.message!));
@@ -92,5 +90,10 @@ class AuthRepository {
     return _users.doc(uid).snapshots().map(
           (event) => UserModel.fromMap(event.data() as Map<String, dynamic>),
         );
+  }
+
+  void logout() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
   }
 }

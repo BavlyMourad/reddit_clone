@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit_clone/core/common/error_text.dart';
 import 'package:reddit_clone/core/common/loader.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
-import 'package:reddit_clone/features/auth/screens/login_screen.dart';
 import 'package:reddit_clone/logger.dart';
 import 'package:reddit_clone/models/user_model.dart';
 import 'package:reddit_clone/router.dart';
@@ -37,7 +36,7 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   UserModel? userModel;
 
-  void getData(WidgetRef ref, User data) async {
+  void getData(User data) async {
     userModel = await ref
         .watch(authControllerProvider.notifier)
         .getUserData(data.uid)
@@ -60,7 +59,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           routerDelegate: RoutemasterDelegate(
             routesBuilder: (context) {
               if (data != null) {
-                getData(ref, data);
+                getData(data);
 
                 if (userModel != null) {
                   return loggedInRoute;
