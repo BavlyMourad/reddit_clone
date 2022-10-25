@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/theme/pallete.dart';
+import 'package:routemaster/routemaster.dart';
 
 class ProfileDrawer extends ConsumerWidget {
   const ProfileDrawer({super.key});
 
+  void navigateToUserProfile(BuildContext context, String uid) {
+    Routemaster.of(context).push('/u/$uid');
+  }
+
   void logout(WidgetRef ref) {
     ref.read(authControllerProvider.notifier).logout();
+  }
+
+  void toggleTheme(WidgetRef ref) {
+    ref.read(themeNotifierProvider.notifier).toggleTheme();
   }
 
   @override
@@ -36,7 +45,7 @@ class ProfileDrawer extends ConsumerWidget {
             ListTile(
               title: const Text('My Profile'),
               leading: const Icon(Icons.person),
-              onTap: () {},
+              onTap: () => navigateToUserProfile(context, user.uid),
             ),
             ListTile(
               title: const Text('Logout'),
@@ -44,8 +53,9 @@ class ProfileDrawer extends ConsumerWidget {
               onTap: () => logout(ref),
             ),
             Switch.adaptive(
-              value: true,
-              onChanged: (value) {},
+              value: ref.watch(themeNotifierProvider.notifier).mode ==
+                  ThemeMode.dark,
+              onChanged: (value) => toggleTheme(ref),
             ),
           ],
         ),

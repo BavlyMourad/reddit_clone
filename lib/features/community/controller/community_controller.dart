@@ -176,6 +176,8 @@ class CommunityController extends StateNotifier<bool> {
       );
     }
 
+    _ref.invalidate(communityControllerProvider);
+
     res.fold(
       (failure) => showSnackBar(context, failure.message),
       (r) {
@@ -188,10 +190,15 @@ class CommunityController extends StateNotifier<bool> {
     );
   }
 
-  void leaveCommunity(String communityName) async {
-    final user = _ref.read(userProvider)!;
+  void addMods(
+      String communityName, List<String> uids, BuildContext context) async {
     final communityRepository = _ref.read(communityRepositoryProvider);
 
-    communityRepository.joinCommunity(communityName, user.uid);
+    final res = await communityRepository.addMods(communityName, uids);
+
+    res.fold(
+      (failure) => showSnackBar(context, failure.message),
+      (r) => Routemaster.of(context).pop(),
+    );
   }
 }

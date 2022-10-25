@@ -55,9 +55,10 @@ class _EditCommunityScreenState extends ConsumerState<EditCommunityScreen> {
   Widget build(BuildContext context) {
     final community = ref.watch(communityProvider)!;
     final isLoading = ref.watch(communityControllerProvider);
+    final currentTheme = ref.watch(themeNotifierProvider);
 
     return Scaffold(
-      backgroundColor: Pallete.darkModeAppTheme.backgroundColor,
+      backgroundColor: currentTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Edit Community'),
         actions: [
@@ -78,8 +79,7 @@ class _EditCommunityScreenState extends ConsumerState<EditCommunityScreen> {
                     GestureDetector(
                       onTap: selectBannerImage,
                       child: DottedBorder(
-                        color: Pallete
-                            .darkModeAppTheme.textTheme.bodyText2!.color!,
+                        color: currentTheme.textTheme.bodyText2!.color!,
                         borderType: BorderType.RRect,
                         radius: const Radius.circular(10.0),
                         dashPattern: const [10, 4],

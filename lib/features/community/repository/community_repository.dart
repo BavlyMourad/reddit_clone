@@ -131,4 +131,19 @@ class CommunityRepository {
       return communities;
     }).first;
   }
+
+  FutureVoid addMods(String communityName, List<String> uids) async {
+    try {
+      return right(
+        _communities.doc(communityName).update({
+          // Dont use fieldarray.union since we are replacing the whole list
+          'mods': uids,
+        }),
+      );
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message.toString()));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
 }
