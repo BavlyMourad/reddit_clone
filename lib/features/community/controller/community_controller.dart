@@ -11,6 +11,7 @@ import 'package:reddit_clone/core/utils.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/community/repository/community_repository.dart';
 import 'package:reddit_clone/models/community_model.dart';
+import 'package:reddit_clone/models/post_model.dart';
 import 'package:routemaster/routemaster.dart';
 
 final communityControllerProvider =
@@ -34,11 +35,21 @@ final getCommunityByNameProvider = FutureProvider.family((ref, String name) {
 
 final communityProvider = StateProvider<CommunityModel?>((ref) => null);
 
-final searchCommunityProvider = FutureProvider.family((ref, String query) {
+final searchCommunityProvider = FutureProvider.family(
+  (ref, String query) {
+    final communityController = ref.watch(communityControllerProvider.notifier);
+
+    return communityController.searchCommunity(query);
+  },
+  name: 'searchCommunityProvider',
+);
+
+final getCommunityPostsProvider =
+    FutureProvider.family((ref, String communityName) {
   final communityController = ref.watch(communityControllerProvider.notifier);
 
-  return communityController.searchCommunity(query);
-}, name: 'searchCommunityProvider');
+  return communityController.getCommunityPosts(communityName);
+});
 
 class CommunityController extends StateNotifier<bool> {
   final Ref _ref;
@@ -176,7 +187,7 @@ class CommunityController extends StateNotifier<bool> {
       );
     }
 
-    _ref.invalidate(communityControllerProvider);
+    _ref.invalidate(getCommunityByNameProvider);
 
     res.fold(
       (failure) => showSnackBar(context, failure.message),
@@ -200,5 +211,13 @@ class CommunityController extends StateNotifier<bool> {
       (failure) => showSnackBar(context, failure.message),
       (r) => Routemaster.of(context).pop(),
     );
+  }
+
+  Future<List<PostModel>> getCommunityPosts(String communityName) {
+    final communityRepository = _ref.read(communityRepositoryProvider);
+
+    _ref.invalidate(getCommunityPostsProvider);
+
+    return communityRepository.getCommunityPosts(communityName);
   }
 }
