@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reddit_clone/core/enums/enums.dart';
 import 'package:reddit_clone/core/providers/storage_repository_provider.dart';
 import 'package:reddit_clone/core/utils.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
@@ -93,5 +94,20 @@ class UserProfileController extends StateNotifier<bool> {
     _ref.invalidate(getUserPostsProvider);
 
     return userProfileRepository.getUserPosts(uid);
+  }
+
+  void updateUserKarma(UserKarma karma) async {
+    final userProfileRepository = _ref.read(userProfileRepositoryProvider);
+    UserModel userModel = _ref.read(userProvider)!;
+
+    userModel = userModel.copyWith(karma: userModel.karma + karma.karma);
+
+    final res = await userProfileRepository.updateUserKarma(userModel);
+
+    res.fold(
+      (failure) => null,
+      (success) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
   }
 }

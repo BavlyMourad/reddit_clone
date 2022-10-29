@@ -28,6 +28,10 @@ class PostCard extends ConsumerWidget {
     ref.read(postsControllerProvider.notifier).downvote(post);
   }
 
+  void awardPost(WidgetRef ref, String award, BuildContext context) async {
+    ref.read(postsControllerProvider.notifier).awardPost(post, award, context);
+  }
+
   void navigateToUserProfile(BuildContext context) {
     Routemaster.of(context).push('/u/${post.uid}');
   }
@@ -117,6 +121,24 @@ class PostCard extends ConsumerWidget {
                                 ),
                             ],
                           ),
+                          if (post.awards.isNotEmpty) ...[
+                            const SizedBox(height: 5.0),
+                            SizedBox(
+                              height: 25.0,
+                              child: ListView.builder(
+                                itemCount: post.awards.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  final award = post.awards[index];
+
+                                  return Image.asset(
+                                    Constants.awards[award]!,
+                                    height: 23.0,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                           Padding(
                             padding: const EdgeInsets.only(top: 10.0),
                             child: Text(
@@ -206,6 +228,47 @@ class PostCard extends ConsumerWidget {
                                   ),
                                 ],
                               ),
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Dialog(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(20.0),
+                                          child: GridView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: user.awards.length,
+                                            gridDelegate:
+                                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 4,
+                                            ),
+                                            itemBuilder: (context, index) {
+                                              final award = user.awards[index];
+
+                                              return GestureDetector(
+                                                onTap: () => awardPost(
+                                                  ref,
+                                                  award,
+                                                  context,
+                                                ),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Image.asset(
+                                                    Constants.awards[award]!,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Icons.card_giftcard_outlined),
+                              ),
                               ref
                                   .watch(getCommunityByNameProvider(
                                       post.communityName))
@@ -224,8 +287,9 @@ class PostCard extends ConsumerWidget {
                                         return const SizedBox();
                                       }
                                     },
-                                    error: (error, stackTrace) =>
-                                        ErrorText(error: error.toString()),
+                                    error: (error, stackTrace) => ErrorText(
+                                      error: error.toString(),
+                                    ),
                                     loading: () => const Loader(),
                                   ),
                             ],

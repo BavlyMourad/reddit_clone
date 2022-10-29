@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reddit_clone/core/enums/enums.dart';
 import 'package:reddit_clone/core/providers/storage_repository_provider.dart';
 import 'package:reddit_clone/core/utils.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/posts/repository/posts_repository.dart';
+import 'package:reddit_clone/features/user_profile/controller/user_profile_controller.dart';
 import 'package:reddit_clone/models/comment_model.dart';
 import 'package:reddit_clone/models/community_model.dart';
 import 'package:reddit_clone/models/post_model.dart';
@@ -98,8 +100,19 @@ class PostsController extends StateNotifier<bool> {
 
     state = false;
 
-    // _ref.invalidate(postsControllerProvider);
     _ref.invalidate(userPostsProvider);
+
+    UserKarma karma;
+
+    if (postType == 'Text') {
+      karma = UserKarma.textPost;
+    } else if (postType == 'Image') {
+      karma = UserKarma.imagePost;
+    } else {
+      karma = UserKarma.linkPost;
+    }
+
+    _ref.read(userProfileControllerProvider.notifier).updateUserKarma(karma);
 
     res.fold(
       (failure) => showSnackBar(context, failure.message),
@@ -124,6 +137,10 @@ class PostsController extends StateNotifier<bool> {
     final postsRepository = _ref.read(postsRepositoryProvider);
 
     final res = await postsRepository.deletePost(postModel);
+
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.deletePost);
 
     _ref.invalidate(userPostsProvider);
 
@@ -158,7 +175,10 @@ class PostsController extends StateNotifier<bool> {
   }
 
   void addComment(
-      BuildContext context, String comment, PostModel postModel) async {
+    BuildContext context,
+    String comment,
+    PostModel postModel,
+  ) async {
     final postsRepository = _ref.read(postsRepositoryProvider);
     final user = _ref.read(userProvider)!;
 
@@ -176,6 +196,10 @@ class PostsController extends StateNotifier<bool> {
 
     final res = await postsRepository.addComment(commentModel);
 
+    _ref
+        .read(userProfileControllerProvider.notifier)
+        .updateUserKarma(UserKarma.comment);
+
     _ref.invalidate(getPostCommentsProvider);
     _ref.invalidate(getPostByIdProvider);
     _ref.invalidate(userPostsProvider);
@@ -190,5 +214,34 @@ class PostsController extends StateNotifier<bool> {
     final postsRepository = _ref.read(postsRepositoryProvider);
 
     return postsRepository.getPostComments(postId);
+  }
+
+  void awardPost(
+    PostModel postModel,
+    String award,
+    BuildContext context,
+  ) async {
+    final postsRepository = _ref.read(postsRepositoryProvider);
+    final user = _ref.read(userProvider)!;
+
+    final res = await postsRepository.awardPost(postModel, award, user.uid);
+
+    res.fold(
+      (failure) => showSnackBar(context, failure.message),
+      (success) {
+        _ref
+            .read(userProfileControllerProvider.notifier)
+            .updateUserKarma(UserKarma.awardPost);
+
+        _ref.read(userProvider.notifier).update((state) {
+          state?.awards.remove(award);
+          return state;
+        });
+
+        _ref.invalidate(userPostsProvider);
+
+        Routemaster.of(context).pop();
+      },
+    );
   }
 }

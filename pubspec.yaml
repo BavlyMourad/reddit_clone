@@ -22,6 +22,7 @@ dependencies:
   flutter_riverpod: ^2.0.2
   fpdart: ^0.3.0
   google_sign_in: ^5.4.2
+  intl: ^0.17.0
   routemaster: ^1.0.1
   shared_preferences: ^2.0.15
   uuid: ^3.0.6
@@ -36,6 +37,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/awards/
 
   fonts:
     - family: MyFlutterApp
