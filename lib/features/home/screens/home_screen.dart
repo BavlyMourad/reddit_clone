@@ -4,6 +4,7 @@ import 'package:reddit_clone/core/constants/constants.dart';
 import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/home/delegates/search_community_delegate.dart';
 import 'package:reddit_clone/features/home/drawers/community_list_drawer.dart';
+import 'package:reddit_clone/features/home/drawers/guest_sign_in_drawer.dart';
 import 'package:reddit_clone/features/home/drawers/profile_drawer.dart';
 import 'package:reddit_clone/theme/pallete.dart';
 
@@ -33,8 +34,9 @@ class _HoomScreenState extends ConsumerState<HoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider)!;
     final currentTheme = ref.watch(themeNotifierProvider);
+    final user = ref.watch(userProvider)!;
+    final isGuest = !user.isAuthenticated;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,25 +72,27 @@ class _HoomScreenState extends ConsumerState<HoomScreen> {
           }),
         ],
       ),
-      drawer: const CommunityListDrawer(),
-      endDrawer: const ProfileDrawer(),
+      drawer: isGuest ? const GuestSignInDrawer() : const CommunityListDrawer(),
+      endDrawer: isGuest ? null : const ProfileDrawer(),
       body: Constants.tabWidgets[_page],
-      bottomNavigationBar: BottomNavigationBar(
-        fixedColor: currentTheme.iconTheme.color,
-        backgroundColor: currentTheme.backgroundColor,
-        onTap: onPageChanged,
-        currentIndex: _page,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: '',
-          ),
-        ],
-      ),
+      bottomNavigationBar: isGuest
+          ? null
+          : BottomNavigationBar(
+              fixedColor: currentTheme.iconTheme.color,
+              backgroundColor: currentTheme.backgroundColor,
+              onTap: onPageChanged,
+              currentIndex: _page,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add),
+                  label: '',
+                ),
+              ],
+            ),
     );
   }
 }

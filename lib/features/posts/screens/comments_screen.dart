@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit_clone/core/common/error_text.dart';
 import 'package:reddit_clone/core/common/loader.dart';
 import 'package:reddit_clone/core/common/post_card.dart';
+import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/features/posts/controller/posts_controller.dart';
 import 'package:reddit_clone/features/posts/widgets/comment_card.dart';
 import 'package:reddit_clone/models/post_model.dart';
@@ -37,6 +38,9 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider)!;
+    final isGuest = !user.isAuthenticated;
+
     return Scaffold(
       appBar: AppBar(),
       body: ref.watch(getPostByIdProvider(widget.postId)).when(
@@ -44,15 +48,16 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
               return Column(
                 children: [
                   PostCard(post: post),
-                  TextField(
-                    controller: commentController,
-                    onSubmitted: (value) => addComment(post),
-                    decoration: const InputDecoration(
-                      hintText: 'Comment',
-                      filled: true,
-                      border: InputBorder.none,
+                  if (!isGuest)
+                    TextField(
+                      controller: commentController,
+                      onSubmitted: (value) => addComment(post),
+                      decoration: const InputDecoration(
+                        hintText: 'Comment',
+                        filled: true,
+                        border: InputBorder.none,
+                      ),
                     ),
-                  ),
                   ref.watch(getPostCommentsProvider(post.id)).when(
                         data: (comments) {
                           return Expanded(

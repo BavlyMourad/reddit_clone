@@ -27,6 +27,12 @@ final userPostsProvider =
   return postsController.fetchUserPosts(communities);
 });
 
+final guestPostsProvider = FutureProvider((ref) {
+  final postsController = ref.watch(postsControllerProvider.notifier);
+
+  return postsController.fetchGuestPosts();
+});
+
 final getPostByIdProvider = FutureProvider.family((ref, String postId) {
   final postsController = ref.watch(postsControllerProvider.notifier);
 
@@ -131,6 +137,12 @@ class PostsController extends StateNotifier<bool> {
     }
 
     return Future.value([]);
+  }
+
+  Future<List<PostModel>> fetchGuestPosts() {
+    final postsRepository = _ref.read(postsRepositoryProvider);
+
+    return postsRepository.fetchGuestPosts();
   }
 
   void deletePost(BuildContext context, PostModel postModel) async {

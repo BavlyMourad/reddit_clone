@@ -5,10 +5,14 @@ import 'package:reddit_clone/features/auth/controller/auth_controller.dart';
 import 'package:reddit_clone/theme/pallete.dart';
 
 class SignInButton extends ConsumerWidget {
-  const SignInButton({super.key});
+  const SignInButton({super.key, this.isFromLogin = true});
+
+  final bool isFromLogin;
 
   void signInWithGoogle(BuildContext context, WidgetRef ref) {
-    ref.read(authControllerProvider.notifier).signInWithGoogle(context);
+    ref
+        .read(authControllerProvider.notifier)
+        .signInWithGoogle(context, isFromLogin);
   }
 
   @override

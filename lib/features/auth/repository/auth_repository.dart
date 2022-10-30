@@ -42,7 +42,7 @@ class AuthRepository {
 
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
-  FutureEither<UserModel> signWithGoogle() async {
+  FutureEither<UserModel> signWithGoogle(bool isFromLogin) async {
     try {
       // GoogleSignIn
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -54,9 +54,15 @@ class AuthRepository {
         idToken: googleAuth?.idToken,
       );
 
-      // FirebaseAuth
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      UserCredential userCredential;
+
+      if (isFromLogin) {
+        // FirebaseAuth
+        userCredential = await _auth.signInWithCredential(credential);
+      } else {
+        userCredential =
+            await _auth.currentUser!.linkWithCredential(credential);
+      }
 
       UserModel userModel;
 
@@ -77,6 +83,30 @@ class AuthRepository {
         // We will take first value of the stream since we need it as a future
         userModel = await getUserData(userCredential.user!.uid).first;
       }
+
+      return right(userModel);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message!));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  FutureEither<UserModel> signInAsGuest() async {
+    try {
+      var userCredential = await _auth.signInAnonymously();
+
+      UserModel userModel = UserModel(
+        name: 'Guest',
+        profilePicture: Constants.avatarDefault,
+        banner: Constants.bannerDefault,
+        uid: userCredential.user!.uid,
+        isAuthenticated: false,
+        karma: 0,
+        awards: [],
+      );
+
+      await _users.doc(userCredential.user!.uid).set(userModel.toMap());
 
       return right(userModel);
     } on FirebaseException catch (e) {
